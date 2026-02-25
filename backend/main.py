@@ -116,7 +116,7 @@ async def api_get_file(task_id: str, background_tasks: BackgroundTasks):
     filename = f"video_{task_id}{os.path.splitext(filepath)[1]}"
     
     # Assign cleanup in background after delivering the file
-    background_tasks.add_task(delete_file_after_delay, filepath, 600)  # delete after 10 minutes
+    background_tasks.add_task(delete_file_after_delay, filepath, 5)  # delete 5 seconds after download finishes
     
     return FileResponse(path=filepath, filename=filename, media_type='application/octet-stream')
 
