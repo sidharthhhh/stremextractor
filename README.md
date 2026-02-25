@@ -4,6 +4,8 @@
 
 It features a premium React UI with glassmorphism design and a powerful Python backend using FastAPI, `yt-dlp`, and `FFmpeg`.
 
+> ⭐ **If you find this project useful, please consider giving it a star on GitHub!** It helps others discover the project and motivates continued development. [Star this repo →](https://github.com/sidharthhhh/stremextractor)
+
 ---
 
 ## 🌟 Features
@@ -39,7 +41,11 @@ pip install -r backend/requirements.txt
 
 # Start the server
 python -m uvicorn backend.main:app --reload --port 8000
+
+# On Windows using the venv Python (if the above doesn't find uvicorn):
+.\backend\venv\Scripts\python.exe -m uvicorn backend.main:app --reload --port 8000
 ```
+
 The FastAPI backend will now be running at `http://localhost:8000`.
 
 ### 2. Start the Frontend
