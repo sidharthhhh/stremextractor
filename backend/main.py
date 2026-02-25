@@ -37,12 +37,20 @@ def background_download_and_process(request: DownloadRequest, task_id: str):
         downloaded_file = download_video(str(request.url), task_id, TEMP_DIR)
         
         # 2. Process if needed
-        is_processing_needed = request.startTime or request.endTime or request.crop
+        is_processing_needed = request.startTime or request.endTime or request.crop or request.format != "mp4"
         
         if is_processing_needed:
             update_task(task_id, status="processing", progress=50.0)
             
-            ext = os.path.splitext(downloaded_file)[1]
+            if request.format == "mp3":
+                ext = ".mp3"
+            elif request.format == "wav":
+                ext = ".wav"
+            elif request.format == "webm":
+                ext = ".webm"
+            else:
+                ext = ".mp4"
+                
             processed_file = os.path.join(TEMP_DIR, f"{task_id}_processed{ext}")
             
             crop_args = {}
@@ -59,6 +67,7 @@ def background_download_and_process(request: DownloadRequest, task_id: str):
                 output_path=processed_file,
                 start_time=request.startTime,
                 end_time=request.endTime,
+                format=request.format,
                 **crop_args
             )
             

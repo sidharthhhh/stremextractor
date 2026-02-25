@@ -10,7 +10,8 @@ def process_video(
     crop_width: Optional[int] = None, 
     crop_height: Optional[int] = None, 
     crop_x: Optional[int] = None, 
-    crop_y: Optional[int] = None
+    crop_y: Optional[int] = None,
+    format: Optional[str] = "mp4"
 ) -> str:
     input_kwargs = {}
     if start_time:
@@ -19,19 +20,36 @@ def process_video(
         input_kwargs['to'] = end_time.replace('.', ':')
 
     stream = ffmpeg.input(input_path, **input_kwargs)
-    reencode_video = False
     
-    # If crop is requested
-    if crop_width is not None and crop_height is not None:
-        reencode_video = True
-        stream = ffmpeg.crop(stream, crop_x or 0, crop_y or 0, crop_width, crop_height)
+    is_audio_only = format in ["mp3", "wav"]
+    if is_audio_only:
+        stream = stream.audio # isolate audio stream only
+        reencode_video = False
+    else:
+        reencode_video = (format != "mp4")
+        # If crop is requested
+        if crop_width is not None and crop_height is not None:
+            reencode_video = True
+            stream = ffmpeg.crop(stream, crop_x or 0, crop_y or 0, crop_width, crop_height)
 
     output_kwargs = {}
-    if reencode_video:
+    
+    if format == "mp3":
+        output_kwargs['acodec'] = 'libmp3lame'
+    elif format == "wav":
+        output_kwargs['acodec'] = 'pcm_s16le'
+    elif format == "webm":
+        output_kwargs['vcodec'] = 'libvpx-vp9'
+        output_kwargs['acodec'] = 'libopus'
+    elif format == "mp4_h264":
         output_kwargs['vcodec'] = 'libx264'
-        output_kwargs['acodec'] = 'copy'
-    else:
-        output_kwargs['c'] = 'copy'
+        output_kwargs['acodec'] = 'aac'
+    else: # pure mp4
+        if reencode_video:
+            output_kwargs['vcodec'] = 'libx264'
+            output_kwargs['acodec'] = 'aac'
+        else:
+            output_kwargs['c'] = 'copy'
 
     stream = ffmpeg.output(stream, output_path, **output_kwargs)
     

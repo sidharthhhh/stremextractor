@@ -17,6 +17,7 @@ export function DownloadForm({ onSubmit, isLoading }: Props) {
     const [cropH, setCropH] = useState('');
     const [cropX, setCropX] = useState('');
     const [cropY, setCropY] = useState('');
+    const [format, setFormat] = useState('mp4');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,7 +32,8 @@ export function DownloadForm({ onSubmit, isLoading }: Props) {
                 height: parseInt(cropH),
                 x: parseInt(cropX) || 0,
                 y: parseInt(cropY) || 0
-            } : undefined
+            } : undefined,
+            format: format
         });
     };
 
@@ -89,6 +91,24 @@ export function DownloadForm({ onSubmit, isLoading }: Props) {
                             <input type="number" placeholder="X Offset (Opt)" value={cropX} onChange={(e) => setCropX(e.target.value)} className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 transition-colors" />
                             <input type="number" placeholder="Y Offset (Opt)" value={cropY} onChange={(e) => setCropY(e.target.value)} className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 transition-colors" />
                         </div>
+                    </div>
+
+                    {/* Format Options */}
+                    <div className="space-y-3 md:col-span-2 pt-2 border-t border-white/10">
+                        <label className="text-xs font-semibold text-purple-200 uppercase tracking-wider block">
+                            Output Format
+                        </label>
+                        <select
+                            value={format}
+                            onChange={(e) => setFormat(e.target.value)}
+                            className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors cursor-pointer appearance-none"
+                        >
+                            <option value="mp4" className="bg-gray-900">MP4 (Default - Best Quality)</option>
+                            <option value="mp4_h264" className="bg-gray-900">MP4 (H.264/AAC - X/Twitter Compatible)</option>
+                            <option value="webm" className="bg-gray-900">WebM (VP9/Opus - Best for Web)</option>
+                            <option value="mp3" className="bg-gray-900">MP3 (Audio Only)</option>
+                            <option value="wav" className="bg-gray-900">WAV (Audio Only - Lossless)</option>
+                        </select>
                     </div>
 
                 </div>

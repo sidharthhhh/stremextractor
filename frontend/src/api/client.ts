@@ -14,6 +14,7 @@ export interface DownloadRequest {
     startTime?: string;
     endTime?: string;
     crop?: CropOptions;
+    format?: string;
 }
 
 export interface TaskStatus {
