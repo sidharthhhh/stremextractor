@@ -13,10 +13,7 @@ export function DownloadForm({ onSubmit, isLoading }: Props) {
 
     const [startTime, setStartTime] = useState('');
     const [endTime, setEndTime] = useState('');
-    const [cropW, setCropW] = useState('');
-    const [cropH, setCropH] = useState('');
-    const [cropX, setCropX] = useState('');
-    const [cropY, setCropY] = useState('');
+    const [isVertical, setIsVertical] = useState(false);
     const [format, setFormat] = useState('mp4');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -27,12 +24,7 @@ export function DownloadForm({ onSubmit, isLoading }: Props) {
             url,
             startTime: startTime || undefined,
             endTime: endTime || undefined,
-            crop: (cropW && cropH) ? {
-                width: parseInt(cropW),
-                height: parseInt(cropH),
-                x: parseInt(cropX) || 0,
-                y: parseInt(cropY) || 0
-            } : undefined,
+            isVertical: isVertical,
             format: format
         });
     };
@@ -80,16 +72,22 @@ export function DownloadForm({ onSubmit, isLoading }: Props) {
                         </div>
                     </div>
 
-                    {/* Cropping */}
+                    {/* Formatting */}
                     <div className="space-y-3">
                         <h4 className="text-xs font-semibold text-purple-200 uppercase tracking-wider flex items-center gap-1">
-                            <Crop className="w-3.5 h-3.5" /> Cropping (Pixels)
+                            <Crop className="w-3.5 h-3.5" /> Video Shape
                         </h4>
-                        <div className="grid grid-cols-2 gap-2">
-                            <input type="number" placeholder="Width" value={cropW} onChange={(e) => setCropW(e.target.value)} className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 transition-colors" />
-                            <input type="number" placeholder="Height" value={cropH} onChange={(e) => setCropH(e.target.value)} className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 transition-colors" />
-                            <input type="number" placeholder="X Offset (Opt)" value={cropX} onChange={(e) => setCropX(e.target.value)} className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 transition-colors" />
-                            <input type="number" placeholder="Y Offset (Opt)" value={cropY} onChange={(e) => setCropY(e.target.value)} className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-2 text-sm text-white placeholder-white/20 focus:outline-none focus:border-purple-500/50 transition-colors" />
+                        <div className="flex items-center gap-2">
+                            <input 
+                                type="checkbox" 
+                                id="isVertical" 
+                                checked={isVertical} 
+                                onChange={(e) => setIsVertical(e.target.checked)} 
+                                className="w-4 h-4 rounded border-white/20 bg-black/20 text-purple-500 focus:ring-purple-500/50" 
+                            />
+                            <label htmlFor="isVertical" className="text-sm text-white/90">
+                                Convert to Shorts/Reels format (9:16 vertical crop)
+                            </label>
                         </div>
                     </div>
 

@@ -1,17 +1,11 @@
 from pydantic import BaseModel, HttpUrl
 from typing import Optional
 
-class CropOptions(BaseModel):
-    width: Optional[int] = None
-    height: Optional[int] = None
-    x: Optional[int] = None
-    y: Optional[int] = None
-
 class DownloadRequest(BaseModel):
     url: HttpUrl
     startTime: Optional[str] = None
     endTime: Optional[str] = None
-    crop: Optional[CropOptions] = None
+    isVertical: Optional[bool] = False
     format: Optional[str] = "mp4"
 
 class DownloadResponse(BaseModel):

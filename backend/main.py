@@ -37,7 +37,7 @@ def background_download_and_process(request: DownloadRequest, task_id: str):
         downloaded_file = download_video(str(request.url), task_id, TEMP_DIR)
         
         # 2. Process if needed
-        is_processing_needed = request.startTime or request.endTime or request.crop or request.format != "mp4"
+        is_processing_needed = request.startTime or request.endTime or request.isVertical or request.format != "mp4"
         
         if is_processing_needed:
             update_task(task_id, status="processing", progress=50.0)
@@ -53,22 +53,13 @@ def background_download_and_process(request: DownloadRequest, task_id: str):
                 
             processed_file = os.path.join(TEMP_DIR, f"{task_id}_processed{ext}")
             
-            crop_args = {}
-            if request.crop:
-                crop_args = {
-                    "crop_width": request.crop.width,
-                    "crop_height": request.crop.height,
-                    "crop_x": request.crop.x,
-                    "crop_y": request.crop.y
-                }
-                
             process_video(
                 input_path=downloaded_file,
                 output_path=processed_file,
                 start_time=request.startTime,
                 end_time=request.endTime,
                 format=request.format,
-                **crop_args
+                is_vertical=request.isVertical
             )
             
             # Remove original file if processed exists

@@ -2,18 +2,11 @@ import axios from 'axios';
 
 const BASE_URL = 'http://127.0.0.1:8000/api';
 
-export interface CropOptions {
-    width?: number;
-    height?: number;
-    x?: number;
-    y?: number;
-}
-
 export interface DownloadRequest {
     url: string;
     startTime?: string;
     endTime?: string;
-    crop?: CropOptions;
+    isVertical?: boolean;
     format?: string;
 }
 

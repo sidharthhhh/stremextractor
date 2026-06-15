@@ -7,10 +7,7 @@ def process_video(
     output_path: str, 
     start_time: Optional[str] = None, 
     end_time: Optional[str] = None, 
-    crop_width: Optional[int] = None, 
-    crop_height: Optional[int] = None, 
-    crop_x: Optional[int] = None, 
-    crop_y: Optional[int] = None,
+    is_vertical: Optional[bool] = False,
     format: Optional[str] = "mp4"
 ) -> str:
     input_kwargs = {}
@@ -27,10 +24,11 @@ def process_video(
         reencode_video = False
     else:
         reencode_video = (format != "mp4")
-        # If crop is requested
-        if crop_width is not None and crop_height is not None:
+        # If vertical crop is requested
+        if is_vertical:
             reencode_video = True
-            stream = ffmpeg.crop(stream, crop_x or 0, crop_y or 0, crop_width, crop_height)
+            # Crops to 9:16 aspect ratio from the center automatically
+            stream = ffmpeg.filter(stream, 'crop', 'ih*9/16', 'ih')
 
     output_kwargs = {}
     
