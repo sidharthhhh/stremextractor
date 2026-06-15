@@ -19,17 +19,30 @@ def process_video(
     stream = ffmpeg.input(input_path, **input_kwargs)
     
     is_audio_only = format in ["mp3", "wav"]
+    
     if is_audio_only:
-        stream = stream.audio # isolate audio stream only
+        final_stream = stream.audio # isolate audio stream only
         reencode_video = False
     else:
+        video_stream = stream.video
+        audio_stream = stream.audio
         reencode_video = (format != "mp4")
-        # If vertical crop is requested
+        
+        # If vertical format is requested
         if is_vertical:
             reencode_video = True
-            # Crops to 9:16 aspect ratio from the center automatically
-            stream = ffmpeg.filter(stream, 'crop', 'ih*9/16', 'ih')
-
+            
+            # Create a blurred background: scale up to cover 1080x1920, crop center, blur
+            bg = ffmpeg.filter(video_stream, 'scale', 1080, 1920, force_original_aspect_ratio='increase')
+            bg = ffmpeg.filter(bg, 'crop', 1080, 1920)
+            bg = ffmpeg.filter(bg, 'boxblur', 20, 20)
+            
+            # Create the foreground: scale down to fit inside 1080x1920
+            fg = ffmpeg.filter(video_stream, 'scale', 1080, 1920, force_original_aspect_ratio='decrease')
+            
+            # Overlay foreground over background
+            video_stream = ffmpeg.overlay(bg, fg, x='(main_w-overlay_w)/2', y='(main_h-overlay_h)/2')
+            
     output_kwargs = {}
     
     if format == "mp3":
@@ -49,10 +62,13 @@ def process_video(
         else:
             output_kwargs['c'] = 'copy'
 
-    stream = ffmpeg.output(stream, output_path, **output_kwargs)
+    if is_audio_only:
+        out = ffmpeg.output(final_stream, output_path, **output_kwargs)
+    else:
+        out = ffmpeg.output(video_stream, audio_stream, output_path, **output_kwargs)
     
     try:
-        ffmpeg.run(stream, overwrite_output=True, quiet=True)
+        ffmpeg.run(out, overwrite_output=True, quiet=True)
         return output_path
     except FileNotFoundError:
         print("FFmpeg error: FFmpeg is not installed or not added to your system PATH.")
