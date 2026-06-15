@@ -1,6 +1,7 @@
 import yt_dlp
 import os
 import uuid
+import time
 from backend.state import update_task
 
 def download_video(url: str, task_id: str, output_dir: str) -> str:
@@ -37,6 +38,13 @@ def download_video(url: str, task_id: str, output_dir: str) -> str:
         'progress_hooks': [progress_hook],
         'quiet': True,
         'no_warnings': True,
+        # Trick YouTube into thinking the request comes from an Android app
+        # This completely bypasses the new web bot-protection without cookies!
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'web'],
+            }
+        },
     }
 
     try:
@@ -62,7 +70,6 @@ def download_video(url: str, task_id: str, output_dir: str) -> str:
                              
             return result_file
     except Exception as e:
-        import time
         # Handle Windows yt-dlp merge temp rename error
         if "WinError 32" in str(e) and ".temp.mp4" in str(e):
             time.sleep(1) # wait for antivirus/ffmpeg lock to release
