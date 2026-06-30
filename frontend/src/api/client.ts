@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
+// Backend API base URL. Configured via the VITE_API_BASE_URL env var,
+// falling back to the local backend for development.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api';
 
 export interface DownloadRequest {
     url: string;

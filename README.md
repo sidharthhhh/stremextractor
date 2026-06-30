@@ -39,6 +39,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r backend/requirements.txt
 
+# Configure environment variables (copy the example and edit as needed)
+cp backend/.env.example backend/.env
+
 # Start the server
 python -m uvicorn backend.main:app --reload --port 8000
 
@@ -58,10 +61,48 @@ cd frontend
 # Install Node dependencies
 npm install
 
+# Configure environment variables (copy the example and edit as needed)
+cp .env.example .env
+
 # Start the Vite dev server
 npm run dev
 ```
 The React frontend will be running at `http://localhost:5173`.
+
+---
+
+## ⚙️ Configuration (Environment Variables)
+
+Both services are configured via `.env` files. Copy the provided `.env.example`
+files and override values per environment. **Never commit real `.env` files** —
+they are gitignored; only the `.env.example` templates are tracked.
+
+### Backend (`backend/.env`)
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `HOST` | `0.0.0.0` | Address the server binds to. |
+| `PORT` | `8000` | Port the server listens on. |
+| `RELOAD` | `false` | Auto-reload on code changes (local dev only). |
+| `DEBUG` | `false` | Exposes the `/api/debug/tasks` endpoint. Keep `false` in production. |
+| `CORS_ORIGINS` | `http://localhost:5173,http://127.0.0.1:5173` | Comma-separated list of allowed frontend origins. |
+| `TEMP_DIR` | `backend/temp` | Directory for temporary download/processing files. |
+| `FILE_CLEANUP_DELAY` | `5` | Seconds to keep a finished file before deleting it. |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `http://127.0.0.1:8000/api` | Base URL of the backend API (including the `/api` prefix). |
+
+### Production notes
+
+- Set `DEBUG=false` and `RELOAD=false`.
+- Restrict `CORS_ORIGINS` to your real frontend domain(s) — avoid `*`.
+- Point `VITE_API_BASE_URL` at your deployed backend, then rebuild the frontend
+  (`npm run build`) so the value is baked into the static assets.
+- Run the backend without `--reload`, e.g.
+  `python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000`.
 
 ---
 

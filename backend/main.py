@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict
 
+from backend.config import settings
 from backend.models import DownloadRequest, DownloadResponse, TaskStatus
 from backend.state import get_task, update_task, tasks_status
 from backend.services.downloader import download_video
@@ -14,16 +15,16 @@ from backend.utils.cleanup import delete_file_after_delay
 
 app = FastAPI(title="Local Video Downloader API")
 
-# Add CORS Middleware to allow requests from local frontend
+# Add CORS Middleware. Allowed origins are configured via the CORS_ORIGINS env var.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "*"],
+    allow_origins=settings.cors_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-TEMP_DIR = os.path.join(os.path.dirname(__file__), "temp")
+TEMP_DIR = settings.temp_dir
 os.makedirs(TEMP_DIR, exist_ok=True)
 
 def background_download_and_process(request: DownloadRequest, task_id: str):
@@ -116,15 +117,16 @@ async def api_get_file(task_id: str, background_tasks: BackgroundTasks):
     filename = f"video_{task_id}{os.path.splitext(filepath)[1]}"
     
     # Assign cleanup in background after delivering the file
-    background_tasks.add_task(delete_file_after_delay, filepath, 5)  # delete 5 seconds after download finishes
-    
+    background_tasks.add_task(delete_file_after_delay, filepath, settings.file_cleanup_delay)
+
     return FileResponse(path=filepath, filename=filename, media_type='application/octet-stream')
 
-@app.get("/api/debug/tasks")
-async def debug_tasks():
-    from backend.state import tasks_status
-    return tasks_status
+if settings.debug:
+    @app.get("/api/debug/tasks")
+    async def debug_tasks():
+        from backend.state import tasks_status
+        return tasks_status
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("backend.main:app", host=settings.host, port=settings.port, reload=settings.reload)
